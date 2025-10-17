@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState,} from 'react'
+import Register from './components/Register.jsx'
+import Login from './components/Login.jsx'
+import HabitsList from './components/HabitsList.jsx'
+import './index.css'
 
+function App() {
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
 
-export default function App() {
-  const [msg, setMsg] = useState(null);
-  useEffect(() => {
-    fetch('http://localhost:3000')
-      .then(response => response.json())
-      .then(data => setMsg(data.message))
-      .catch(() => setMsg('API não alcançavel'));
-  }, []);
+  if (!token) {
+    return (
+      <div>
+        <Login setToken={setToken} />
+        <Register />
+      </div>
+    );
+  }
 
+  return <HabitsList />;
+}
 
-  return (
-    <div style = {{fontFamily: 'Inter, system-ui', padding: 40}}>
-      <h1>MicroHabits esta vivo</h1>
-      <p>{msg ?? 'Carregando API...'}</p>  
-    </div>
-  )
-} 
+export default App;
