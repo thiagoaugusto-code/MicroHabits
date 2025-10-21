@@ -18,7 +18,7 @@ model Habit {
   id          Int       @id @default(autoincrement())
   title       String
   description String?
-  frequency   String    // daily, weekly, etc
+  frequency   String?    // daily, weekly, etc
   createdAt   DateTime  @default(now())
   userId      Int
   user        User      @relation(fields: [userId], references: [id])

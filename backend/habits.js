@@ -6,13 +6,20 @@ const router = express.Router();
 
 // criar habito
 router.post('/', async (req, res) => {
-    const { title, description, frequency, userId} = req.body;
+    console.log("Corpo da requisição:", req.body); // Log do corpo da requisição
+    const { name, userId} = req.body;
+    if (!name || !userId) {
+        return res.status(400).json({ error: 'Nome e userId são obrigatórios' });
+    }
+    console.log("Recebendo hábito:", name, userId); // Confirmação de recebimento
+
     try {
         const habit = await prisma.habit.create({
-            data: { title, description, frequency, userId: Number(userId) },
+            data: { title: name, userId: Number(userId) },
         });
         res.json(habit);
     } catch (error) {
+        console.error("Erro ao criar hábito:", error); // Log do erro
         res.status(400).json({ error: 'Erro ao criar habito', details: error.message });
     }
 });
