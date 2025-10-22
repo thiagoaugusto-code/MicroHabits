@@ -7,15 +7,15 @@ const router = express.Router();
 // criar habito
 router.post('/', async (req, res) => {
     console.log("Corpo da requisição:", req.body); // Log do corpo da requisição
-    const { name, userId} = req.body;
-    if (!name || !userId) {
+    const { title, userId} = req.body;
+    if (!title || !userId) {
         return res.status(400).json({ error: 'Nome e userId são obrigatórios' });
     }
-    console.log("Recebendo hábito:", name, userId); // Confirmação de recebimento
+    console.log("Recebendo hábito:", title, userId); // Confirmação de recebimento
 
     try {
         const habit = await prisma.habit.create({
-            data: { title: name, userId: Number(userId) },
+            data: { title, userId: Number(userId) },
         });
         res.json(habit);
     } catch (error) {
