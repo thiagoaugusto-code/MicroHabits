@@ -21,7 +21,7 @@ export default function App() {
   const [showRegister, setShowRegister] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("user"); // remove dados do usuário ao deslogar
+    localStorage.removeItem("user"); //remove dados do usuário ao deslogar
     localStorage.removeItem("token");
     setUser(null);
     setToken(null);

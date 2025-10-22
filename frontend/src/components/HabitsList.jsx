@@ -4,8 +4,10 @@ import { api } from "../api";
 export default function HabitsList() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
+  const [editingHabitId, setEditingHabitId] = useState(null);
+  const [editingHabitName, setEditingHabitName] = useState('');
 
-  // Garantir leitura segura do localStorage e tratamento do userId
+    //leitura segura do localStorage e tratamento do userId
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
 
@@ -36,12 +38,12 @@ export default function HabitsList() {
     }
 
     
-    console.log("Enviando hábito:", { name: newHabit, userId });
+    console.log("Enviando hábito:", { title: newHabit, userId });
 
     try {
-      await api.post('/habits', { name: newHabit, userId });
+      const res = await api.post('/habits', { title: newHabit, userId });
+      setHabits(prev => [...prev, res.data]);
       setNewHabit('');
-      fetchHabits();
     } catch (error) {
       console.error("Erro ao adicionar hábito:", error);
     }
@@ -50,11 +52,31 @@ export default function HabitsList() {
   const deleteHabit = async (habitId) => {
     try {
       await api.delete(`/habits/${habitId}`);
-      fetchHabits();
+      setHabits(prev => prev.filter(habit => habit.id !== habitId));
     } catch (error) {
       console.error("Erro ao deletar hábito:", error);
     }
   };
+
+  const startEditing = (habit) => {
+    setEditingHabitId(habit.id);
+    setEditingHabitName(habit.title);
+  }
+  const saveHabit = async (habitId) => {
+    if (!editingHabitName.trim()) {
+      alert('O nome do hábito não pode ser vazio.');
+      return;
+    }
+    try {
+      await api.patch(`/habits/${habitId}`, { title: editingHabitName });
+      setHabits(prev => prev.map(habit => habit.id === habitId ? { ...habit, title: editingHabitName } : habit));
+      setEditingHabitId(null);
+      setEditingHabitName('');
+    } catch (error) {
+      console.error("Erro ao atualizar hábito:", error);
+    }
+};
+  
 
   return (
     <div>
@@ -69,8 +91,18 @@ export default function HabitsList() {
 
       <ul>
         {habits.map(habit => (
-          <li key={habit.id}>
-            <span>{habit.title}</span>
+            <li key={habit.id}>
+            {editingHabitId === habit.id ? (
+                <>
+                    <input value={editingHabitName} onChange={e => setEditingHabitName(e.target.value)} />
+                    <button onClick={() => saveHabit(habit.id)}>Salvar</button>
+                </>
+            ) : (
+                <>
+                    <span>{habit.title}</span>
+                    <button onClick={() => startEditing(habit)}>Editar</button>
+                </>
+            )}
             <small>Frequência: {habit.frequency || "-"}</small>
             <small>Criado em: {new Date(habit.createdAt).toLocaleDateString()}</small>
             <button onClick={() => deleteHabit(habit.id)}>Deletar</button>
