@@ -57,12 +57,61 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
+        //Primeiro deletar os completions associados ao hábito
+        await prisma.habitCompletion.deleteMany({
+            where: { habitId: Number(id) },
+        });
+        //Depois deletar o hábito em si
         await prisma.habit.delete({
             where: { id: Number(id) },
         });
         res.json({ message: 'Habito deletado' });
     } catch (error) {
         res.status(400).json({ error: 'Erro ao deletar habito', details: error.message });
+    }
+});
+
+//Marcar habito como feito
+router.post('/:id/complete', async (req, res) => {
+    const { id } = req.params;
+    const {userId} = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'userId é obrigatório' });
+    }
+
+    try {
+        const completion = await prisma.habitCompletion.create({
+            data: {
+                habitId: Number(id),
+                userId: Number(userId),
+                completedAt: new Date(),
+            },
+        });
+        res.json(completion);
+    } catch (error) {
+        console.error("Erro ao marcar hábito como feito:", error); // Log do erro
+        res.status(400).json({ error: 'Erro ao marcar habito como feito', details: error.message });
+    }
+});
+
+//Desmarcar habito como feito
+router.delete('/:id/complete', async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).json({ error: 'userId é obrigatório' });
+    }
+    try {
+        await prisma.habitCompletion.deleteMany({
+            where: {    
+                habitId: Number(id),
+                userId: Number(userId),
+            },
+        });
+        res.json({ message: 'Habito desmarcado como feito' });
+    } catch (error) {
+        res.status(400).json({ error: 'Erro ao desmarcar habito como feito', details: error.message });
     }
 });
 
