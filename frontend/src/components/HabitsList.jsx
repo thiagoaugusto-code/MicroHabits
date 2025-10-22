@@ -30,7 +30,7 @@ export default function HabitsList() {
       console.error("Erro ao buscar hábitos:", error);
     }
   };
-
+  //Adicionar habito
   const addHabit = async () => {
     if (!newHabit.trim()) {
       alert('O nome do hábito não pode ser vazio.');
@@ -49,6 +49,7 @@ export default function HabitsList() {
     }
   };
 
+  //Deletar habito
   const deleteHabit = async (habitId) => {
     try {
       await api.delete(`/habits/${habitId}`);
@@ -62,6 +63,8 @@ export default function HabitsList() {
     setEditingHabitId(habit.id);
     setEditingHabitName(habit.title);
   }
+
+  //Salvar habito editado
   const saveHabit = async (habitId) => {
     if (!editingHabitName.trim()) {
       alert('O nome do hábito não pode ser vazio.');
@@ -76,6 +79,27 @@ export default function HabitsList() {
       console.error("Erro ao atualizar hábito:", error);
     }
 };
+
+    //Marcar habito como feito
+    const toggleComplete = async (habitId, isCompleted) => {
+    try {
+      if (isCompleted) {
+        // Desmarcar
+        await api.delete(`/habits/${habitId}/complete`, { data: { userId } });
+      } else {
+        // Marcar
+        await api.post(`/habits/${habitId}/complete`, { userId });
+      }
+      // Atualiza o estado local
+      setHabits(prev =>
+        prev.map(habit =>
+          habit.id === habitId ? { ...habit, completed: !isCompleted } : habit
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao marcar/desmarcar hábito:", error);
+    }
+  };
   
 
   return (
@@ -99,7 +123,10 @@ export default function HabitsList() {
                 </>
             ) : (
                 <>
-                    <span>{habit.title}</span>
+                <input type="checkbox" checked={habit.completed || false} 
+                onChange={() => toggleComplete(habit.id, habit.completed)}
+                />
+                    <span style={{ textDecoration: habit.completed ? 'line-through' : 'none'}}>{habit.title}</span>
                     <button onClick={() => startEditing(habit)}>Editar</button>
                 </>
             )}
