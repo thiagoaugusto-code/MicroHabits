@@ -8,22 +8,23 @@ generator client {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
   habits   Habit[]
 }
 
 model Habit {
-  id              Int               @id @default(autoincrement())
-  title           String
-  description     String?
-  frequency       String? // daily, weekly, etc
-  createdAt       DateTime          @default(now())
-  userId          Int
-  user            User              @relation(fields: [userId], references: [id])
-  logs            HabitLog[]
-  HabitCompletion HabitCompletion[]
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  frequency   String?    // daily, weekly, etc
+  createdAt   DateTime  @default(now())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  logs        HabitLog[]
+
+  completions HabitCompletion [] @relation(onDelete: Cascade)
 }
 
 model HabitLog {
@@ -35,9 +36,9 @@ model HabitLog {
 }
 
 model HabitCompletion {
-  id          Int      @id @default(autoincrement())
-  habitId     Int
-  habit       Habit    @relation(fields: [habitId], references: [id])
-  userId      Int
+  id        Int      @id @default(autoincrement())
+  habitId   Int
+  habit     Habit    @relation(fields: [habitId], references: [id])
+  userId    Int
   completedAt DateTime @default(now())
 }
