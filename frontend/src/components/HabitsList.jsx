@@ -6,12 +6,13 @@ export default function HabitsList() {
   const [newHabit, setNewHabit] = useState('');
   const [editingHabitId, setEditingHabitId] = useState(null);
   const [editingHabitName, setEditingHabitName] = useState('');
+  const [category, setCategory] = useState('');
+  const [frequency, setFrequency] = useState('');
+  const [status, setStatus] = useState('');
 
     //leitura segura do localStorage e tratamento do userId
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
-
-  // Ajuste — tenta capturar o campo correto do ID, já que pode vir como id, userId ou sub
   const userId = user?.id || user?.userId || user?.sub;
 
   // Debug temporário pra conferir o que vem do token
@@ -20,11 +21,18 @@ export default function HabitsList() {
 
   useEffect(() => {
     if (userId) fetchHabits();
-  }, [userId]);
+  }, [userId, category, frequency, status]);
 
   const fetchHabits = async () => {
     try {
-      const res = await api.get(`/habits?userId=${userId}`);
+      const queryParams = new URLSearchParams({ userId,
+        ...(category && { category }),
+        ...(frequency && { frequency }),
+        ...(status && { status }),
+       }).toString();
+
+
+      const res = await api.get(`/habits?${queryParams}`);
       setHabits(res.data);
     } catch (error) {
       console.error("Erro ao buscar hábitos:", error);
@@ -105,6 +113,31 @@ export default function HabitsList() {
   return (
     <div>
       <h2>Meus Hábitos</h2>
+      <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
+        <select value={category} onChange={e => setCategory(e.target.value)}>
+          <option value=''>Todas as Categorias</option>
+          <option value='Saúde'>Saúde</option>
+          <option value='Estudos'>Estudos</option>
+          <option value='Trabalho'>Trabaho</option>
+          <option value="Pessoal">Pessoal</option>
+        </select>
+
+        <select value={frequency} onChange={e => setFrequency(e.target.value)}>
+          <option value=''>Todas as Frequências</option>
+          <option value='Diário'>Diário</option>
+          <option value='Semanal'>Semanal</option>
+          <option value='Mensal'>Mensal</option>
+        </select>
+
+        <select value={status} onChange={e => setStatus(e.target.value)}>
+          <option value=''>Todos os Status</option>
+          <option value='completed'>Completados</option>
+          <option value='pending'>Pendentes</option>
+        </select>
+      </div>
+
+
+
       <input
         type="text"
         placeholder="Novo Hábito"
