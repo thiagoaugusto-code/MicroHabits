@@ -3,12 +3,16 @@ import { api } from "../api";
 
 export default function HabitsList() {
   const [habits, setHabits] = useState([]);
-  const [newHabit, setNewHabit] = useState('');
   const [editingHabitId, setEditingHabitId] = useState(null);
   const [editingHabitName, setEditingHabitName] = useState('');
-  const [category, setCategory] = useState('');
-  const [frequency, setFrequency] = useState('');
-  const [status, setStatus] = useState('');
+
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterFrequency, setFilterFrequency] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const [newHabitTitle, setNewHabitTitle] = useState('');
+  const [newHabitCategory, setNewHabitCategory] = useState('');
+  const [newHabitFrequency, setNewHabitFrequency] = useState('');
 
     //leitura segura do localStorage e tratamento do userId
   const storedUser = localStorage.getItem('user');
@@ -21,37 +25,45 @@ export default function HabitsList() {
 
   useEffect(() => {
     if (userId) fetchHabits();
-  }, [userId, category, frequency, status]);
+  }, [userId, filterCategory, filterFrequency, filterStatus]);
 
   const fetchHabits = async () => {
     try {
       const queryParams = new URLSearchParams({ userId,
-        ...(category && { category }),
-        ...(frequency && { frequency }),
-        ...(status && { status }),
+        ...(filterCategory && { category: filterCategory }),
+        ...(filterFrequency && { frequency: filterFrequency }),
+        ...(filterStatus && { status: filterStatus }),
        }).toString();
 
 
       const res = await api.get(`/habits?${queryParams}`);
-      setHabits(res.data);
+      setHabits(res.data.map(habit => ({
+        ...habit,
+        completed: habit.completions && habit.completions.length > 0
+      })));
     } catch (error) {
       console.error("Erro ao buscar hábitos:", error);
     }
   };
+
   //Adicionar habito
   const addHabit = async () => {
-    if (!newHabit.trim()) {
-      alert('O nome do hábito não pode ser vazio.');
-      return;
-    }
-
-    
-    console.log("Enviando hábito:", { title: newHabit, userId });
+    if (!newHabitTitle.trim()) return alert('O nome do hábito não pode ser vazio.');
+      
+    console.log("Enviando hábito:", { title: newHabitTitle, userId, category: newHabitCategory, frequency: newHabitFrequency }); // Confirmação de envio
 
     try {
-      const res = await api.post('/habits', { title: newHabit, userId });
-      setHabits(prev => [...prev, res.data]);
-      setNewHabit('');
+      const res = await api.post('/habits', { title: newHabitTitle, 
+        userId, 
+        category: newHabitCategory || null, 
+        frequency: newHabitFrequency || null });
+
+        setHabits(prev => [...prev, {...res.data, completed: false}]);
+        setNewHabitTitle('');
+        setNewHabitCategory('');
+        setNewHabitFrequency('');
+
+        fetchHabits();
     } catch (error) {
       console.error("Erro ao adicionar hábito:", error);
     }
@@ -114,37 +126,53 @@ export default function HabitsList() {
     <div>
       <h2>Meus Hábitos</h2>
       <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
-        <select value={category} onChange={e => setCategory(e.target.value)}>
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
           <option value=''>Todas as Categorias</option>
           <option value='Saúde'>Saúde</option>
           <option value='Estudos'>Estudos</option>
-          <option value='Trabalho'>Trabaho</option>
+          <option value='Trabalho'>Trabalho</option>
           <option value="Pessoal">Pessoal</option>
         </select>
 
-        <select value={frequency} onChange={e => setFrequency(e.target.value)}>
+        <select value={filterFrequency} onChange={e => setFilterFrequency(e.target.value)}>
           <option value=''>Todas as Frequências</option>
           <option value='Diário'>Diário</option>
           <option value='Semanal'>Semanal</option>
           <option value='Mensal'>Mensal</option>
         </select>
 
-        <select value={status} onChange={e => setStatus(e.target.value)}>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value=''>Todos os Status</option>
           <option value='completed'>Completados</option>
           <option value='pending'>Pendentes</option>
         </select>
       </div>
 
+      <div style={{marginBottom: '15px'}}>
 
+        <input
+          type="text"
+          placeholder="Novo Hábito"
+          value={newHabitTitle}
+          onChange={e => setNewHabitTitle(e.target.value)}
+        />
+        <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
+            <option value="">Categoria</option>
+            <option value='Saúde'>Saúde</option>
+            <option value='Estudos'>Estudos</option>
+            <option value='Trabalho'>Trabalho</option>
+            <option value='Pessoal'>Pessoal</option>
+          </select>
 
-      <input
-        type="text"
-        placeholder="Novo Hábito"
-        value={newHabit}
-        onChange={e => setNewHabit(e.target.value)}
-      />
-      <button onClick={addHabit}>Adicionar Hábito</button>
+          <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
+            <option value="">Frequência</option>
+            <option value='Diário'>Diário</option>
+            <option value='Semanal'>Semanal</option>
+            <option value='Mensal'>Mensal</option>
+          </select>
+        <button onClick={addHabit}>Adicionar Hábito</button>
+      </div>
+
 
       <ul>
         {habits.map(habit => (
@@ -159,11 +187,16 @@ export default function HabitsList() {
                 <input type="checkbox" checked={habit.completed || false} 
                 onChange={() => toggleComplete(habit.id, habit.completed)}
                 />
-                    <span style={{ textDecoration: habit.completed ? 'line-through' : 'none'}}>{habit.title}</span>
+                    <span style={{ textDecoration: habit.completed ? 'line-through' : 'none',
+                      color: habit.filterCategory === 'Saúde' ? 'green' :
+                      habit.Category === 'Estudos' ? 'blue' :
+                      habit.Category === 'Trabalho' ? 'orange' :
+                      habit.Category === 'Pessoal' ? 'purple' : 'black'
+                    }}>{habit.title}</span>
                     <button onClick={() => startEditing(habit)}>Editar</button>
                 </>
             )}
-            <small>Frequência: {habit.frequency || "-"}</small>
+            <small>Frequência: {habit.Frequency || "-"}</small>
             <small>Criado em: {new Date(habit.createdAt).toLocaleDateString()}</small>
             <button onClick={() => deleteHabit(habit.id)}>Deletar</button>
           </li>
