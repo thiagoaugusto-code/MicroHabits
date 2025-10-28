@@ -7,7 +7,7 @@ const router = express.Router();
 // criar habito
 router.post('/', async (req, res) => {
     console.log("Corpo da requisição:", req.body); // Log do corpo da requisição
-    const { title, userId} = req.body;
+    const { title, userId, category, frequency} = req.body;
     if (!title || !userId) {
         return res.status(400).json({ error: 'Nome e userId são obrigatórios' });
     }
@@ -15,7 +15,9 @@ router.post('/', async (req, res) => {
 
     try {
         const habit = await prisma.habit.create({
-            data: { title, userId: Number(userId) },
+            data: { title, userId: Number(userId), 
+                category: category || null, 
+                frequency: frequency || null },
         });
         res.json(habit);
     } catch (error) {
@@ -24,16 +26,36 @@ router.post('/', async (req, res) => {
     }
 });
 
-//Listar habitos
+//Listar habitos (com filtros)
 router.get('/', async (req, res) => {
-    const { userId } = req.query;
+    const { userId, category, frequency, status } = req.query; 
+    if (!userId) {
+        return res.status(400).json({ error: 'userId é obrigatório' });
+    }
+
+    // 🧠 Montagem dinâmica dos filtros
+    const where = { userId: Number(userId) };
+
+    if (category) where.category = category;     
+    if (frequency) where.frequency = frequency; 
+
+    // 🧩 Filtros de status (pendente / concluído)
+    if (status === 'completed') {
+        where.completions = { some: {} }; 
+    } else if (status === 'pending') {
+        where.completions = { none: {} }; 
+    }
+
     try {
         const habits = await prisma.habit.findMany({
-            where: { userId: Number(userId) },
+            where,
+            include: { completions: true },
+            orderBy: { createdAt: 'desc' },
         });
         res.json(habits);
     } catch (error) {
-        res.status(400).json({ error: 'Erro ao listar habitos', details: error.message });
+        console.error('Erro ao buscar hábitos com filtro:', error);
+        res.status(400).json({ error: 'Erro ao buscar hábitos', details: error.message });
     }
 });
 
@@ -41,11 +63,11 @@ router.get('/', async (req, res) => {
 //Atualizar habito
 router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    const data = req.body;
+    const {title, category, frequency, complete} = req.body;
     try {
         const habit = await prisma.habit.update({
             where: { id: Number(id) },
-            data,
+            data: { title, category, frequency, complete },
         });
         res.json(habit);
     } catch (error) {
