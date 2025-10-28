@@ -11,6 +11,17 @@ router.post('/', async (req, res) => {
     if (!title || !userId) {
         return res.status(400).json({ error: 'Nome e userId são obrigatórios' });
     }
+
+    const validCategories = ["Saúde", "Estudos", "Trabalho", "Pessoal"];
+    if (category && !validCategories.includes(category)) {
+        return res.status(400).json({ error: 'Categoria inválida' });
+    }
+
+    const validFrequencies = ["Diário", "Semanal", "Mensal"];
+    if (frequency && !validFrequencies.includes(frequency)) {
+        return res.status(400).json({ error: 'Frequência inválida' });
+    }
+
     console.log("Recebendo hábito:", title, userId); // Confirmação de recebimento
 
     try {
@@ -35,11 +46,10 @@ router.get('/', async (req, res) => {
 
     // 🧠 Montagem dinâmica dos filtros
     const where = { userId: Number(userId) };
-
     if (category) where.category = category;     
     if (frequency) where.frequency = frequency; 
 
-    // 🧩 Filtros de status (pendente / concluído)
+    // Filtros de status (pendente / concluído)
     if (status === 'completed') {
         where.completions = { some: {} }; 
     } else if (status === 'pending') {
@@ -52,7 +62,14 @@ router.get('/', async (req, res) => {
             include: { completions: true },
             orderBy: { createdAt: 'desc' },
         });
-        res.json(habits);
+
+        const habitsWithCompletionStatus = habits.map(habit => ({
+            ...habit,
+            completed: habit.completions && habit.completions.length > 0,
+        }));
+
+
+        res.json(habitsWithCompletionStatus);
     } catch (error) {
         console.error('Erro ao buscar hábitos com filtro:', error);
         res.status(400).json({ error: 'Erro ao buscar hábitos', details: error.message });
@@ -64,6 +81,17 @@ router.get('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
     const { id } = req.params;
     const {title, category, frequency, complete} = req.body;
+
+    const validCategories = ["Saúde", "Estudos", "Trabalho", "Pessoal"];
+    if (category && !validCategories.includes(category)) {
+        return res.status(400).json({ error: 'Categoria inválida' });
+    }
+
+    const validFrequencies = ["Diário", "Semanal", "Mensal"];
+    if (frequency && !validFrequencies.includes(frequency)) {
+        return res.status(400).json({ error: 'Frequência inválida' });
+    }
+
     try {
         const habit = await prisma.habit.update({
             where: { id: Number(id) },
