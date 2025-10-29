@@ -1,16 +1,43 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 🧠 microHabits
 
-Currently, two official plugins are available:
+Aplicação para criação e acompanhamento de micro-hábitos diários, desenvolvida com **React (Vite)** no front-end e **Node.js + Express** no back-end.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Permite cadastrar, editar, filtrar e gerenciar hábitos com base em **categoria**, **frequência** e **status**, com atualização em tempo real e interface simples.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Tecnologias utilizadas
 
-## Expanding the ESLint configuration
+### Front-end
+- ⚛️ React (Vite)
+- 🔄 Axios (requisições HTTP)
+- 🎨 CSS puro (ou Tailwind, opcional)
+- ⚙️ Hooks: `useState`, `useEffect`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Back-end
+- 🟩 Node.js
+- 🚏 Express
+- 🧩 Prisma ORM (se configurado)
+- 🗃️ SQLite / PostgreSQL (dependendo do ambiente)
+
+---
+
+## ⚙️ Funcionalidades principais
+
+✅ Criar hábitos com **título**, **categoria** e **frequência**  
+✅ Filtrar hábitos por **categoria**, **frequência** e **status (concluído/não concluído)**  
+✅ Editar e excluir hábitos diretamente da interface  
+✅ Interface dinâmica, com renderização automática após alterações  
+✅ Persistência de dados no banco de dados via API REST  
+
+---
+Instalar dependências
+# Backend
+cd backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
