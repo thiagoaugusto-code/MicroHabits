@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import './HabitsList.css';
 
 export default function HabitsList() {
   const [habits, setHabits] = useState([]);
@@ -174,9 +175,11 @@ export default function HabitsList() {
       </div>
 
 
-      <ul>
+      <div className="habits-list">
         {habits.map(habit => (
-            <li key={habit.id}>
+            <div key={habit.id} className={`habit-card ${habit.category?.toLowerCase() || ''}`}
+            style={{ backgroundColor: habit.completed ? '#eafbea' : 'white'}}>
+
             {editingHabitId === habit.id ? (
                 <>
                     <input value={editingHabitName} onChange={e => setEditingHabitName(e.target.value)} />
@@ -184,24 +187,27 @@ export default function HabitsList() {
                 </>
             ) : (
                 <>
-                <input type="checkbox" checked={habit.completed || false} 
-                onChange={() => toggleComplete(habit.id, habit.completed)}
-                />
-                    <span style={{ textDecoration: habit.completed ? 'line-through' : 'none',
-                      color: habit.filterCategory === 'Saúde' ? 'green' :
-                      habit.Category === 'Estudos' ? 'blue' :
-                      habit.Category === 'Trabalho' ? 'orange' :
-                      habit.Category === 'Pessoal' ? 'purple' : 'black'
-                    }}>{habit.title}</span>
-                    <button onClick={() => startEditing(habit)}>Editar</button>
+                <div className="habit-title-container">
+                  <input type="checkbox" checked={habit.completed || false} 
+                  onChange={() => toggleComplete(habit.id, habit.completed)}
+                  />
+                      <span className={`habit-title ${habit.completed ? 'completed' : ''}`}
+                      >{habit.title}</span>
+                </div>
+                <div className="habit-info">
+                  <p>📂 Categoria: {habit.category || "-"}</p>
+                  <p>⏰ Frequência: {habit.frequency || "-"}</p>
+                  <p>🗓️ Criado em: {new Date(habit.createdAt).toLocaleDateString()}</p>
+                </div>     
+            <div className="habit-actions">
+              <button onClick={() => startEditing(habit)}>Editar</button>
+              <button className="delete" onClick={() => deleteHabit(habit.id)}>Deletar</button>
+            </div>
                 </>
             )}
-            <small>Frequência: {habit.Frequency || "-"}</small>
-            <small>Criado em: {new Date(habit.createdAt).toLocaleDateString()}</small>
-            <button onClick={() => deleteHabit(habit.id)}>Deletar</button>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

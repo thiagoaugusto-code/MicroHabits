@@ -1,0 +1,117 @@
+body {
+  background-color: #000000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding-top: 40px;
+}
+
+/* ----- Estrutura geral ----- */
+.habits-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Inter", sans-serif;
+}
+
+.habits-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* ----- Filtros e criação ----- */
+.filter-section, .new-habit-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-section select, 
+.new-habit-section select, 
+.new-habit-section input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* ----- Cards de hábitos ----- */
+.habit-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.habit-card:hover {
+  transform: scale(1.01);
+}
+
+/* ----- Cores por categoria ----- */
+.habit-card.saúde { border-left: 6px solid #2ecc71; }
+.habit-card.estudos { border-left: 6px solid #3498db; }
+.habit-card.trabalho { border-left: 6px solid #f39c12; }
+.habit-card.pessoal { border-left: 6px solid #9b59b6; }
+
+/* ----- Título e status ----- */
+.habit-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.habit-title.completed {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.habit-info {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.habit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.habit-actions button {
+  background-color: #2196f3;
+}
+
+.habit-actions button:hover {
+  background-color: #1976d2;
+}
+
+.habit-actions .delete {
+  background-color: #e74c3c;
+}
+
+.habit-actions .delete:hover {
+  background-color: #c0392b;
+}
+
