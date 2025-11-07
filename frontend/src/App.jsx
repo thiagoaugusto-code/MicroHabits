@@ -31,7 +31,7 @@ export default function App() {
     <div>
       {user ? (
         <>
-          <button onClick={handleLogout}>Logout</button>
+          <button className="logout" onClick={handleLogout}>Logout</button>
           <HabitsList user={user} />
         </>
       ) : showRegister ? (

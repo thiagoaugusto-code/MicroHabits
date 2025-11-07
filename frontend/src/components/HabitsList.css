@@ -1,5 +1,5 @@
 body {
-  background-color: #000000;
+  background-color: #000000c0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -47,6 +47,14 @@ button {
   color: white;
   cursor: pointer;
   transition: 0.3s;
+}
+
+.logout{
+    background-color: red;
+    transition: 0.3s;
+}
+.logout:hover{
+    background-color: darkred;
 }
 
 button:hover {
@@ -115,3 +123,65 @@ button:hover {
   background-color: #c0392b;
 }
 
+select {
+    cursor: pointer;
+    background-color: #ffffffdd;
+    color: black;
+    border-radius: 8px;
+    padding: 0.6em 1.2em;
+    margin: 5px;
+}
+
+.new-habit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  margin-bottom: 25px;
+  margin-top: 25px;
+}
+
+/* Linha dos selects e botão */
+.habit-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-habits-input {
+    background: none;
+    color: white;
+}
+
+.habit-input-group select {
+  flex: 1;
+  min-width: 130px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ffffffdd;
+  color: #333;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.habit-input-group button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.habit-input-group button:hover {
+  background-color: #43a047;
+  transform: scale(1.03);
+}

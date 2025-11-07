@@ -126,7 +126,7 @@ export default function HabitsList() {
   return (
     <div>
       <h2>Meus Hábitos</h2>
-      <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
+      <div >
         <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
           <option value=''>Todas as Categorias</option>
           <option value='Saúde'>Saúde</option>
@@ -149,29 +149,32 @@ export default function HabitsList() {
         </select>
       </div>
 
-      <div style={{marginBottom: '15px'}}>
+      <div className="new-habit-section">
 
         <input
+          className="new-habits-input"
           type="text"
           placeholder="Novo Hábito"
           value={newHabitTitle}
           onChange={e => setNewHabitTitle(e.target.value)}
         />
-        <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
-            <option value="">Categoria</option>
-            <option value='Saúde'>Saúde</option>
-            <option value='Estudos'>Estudos</option>
-            <option value='Trabalho'>Trabalho</option>
-            <option value='Pessoal'>Pessoal</option>
-          </select>
+        <div className="habit-input-group">
+          <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
+              <option value="">Categoria</option>
+              <option value='Saúde'>Saúde</option>
+              <option value='Estudos'>Estudos</option>
+              <option value='Trabalho'>Trabalho</option>
+              <option value='Pessoal'>Pessoal</option>
+            </select>
 
-          <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
-            <option value="">Frequência</option>
-            <option value='Diário'>Diário</option>
-            <option value='Semanal'>Semanal</option>
-            <option value='Mensal'>Mensal</option>
-          </select>
-        <button onClick={addHabit}>Adicionar Hábito</button>
+            <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
+              <option value="">Frequência</option>
+              <option value='Diário'>Diário</option>
+              <option value='Semanal'>Semanal</option>
+              <option value='Mensal'>Mensal</option>
+            </select>
+          <button onClick={addHabit}>Adicionar Hábito</button>
+        </div>
       </div>
 
 
