@@ -54,6 +54,8 @@ export default function HabitsList() {
   //Adicionar habito
   const addHabit = async () => {
     if (!newHabitTitle.trim()) return alert('O nome do hábito não pode ser vazio.');
+    if (!newHabitCategory) return alert('Por favor, selecione uma categoria para o hábito.');
+    if (!newHabitFrequency) return alert('Por favor, selecione uma frequência para o hábito.');
       
     console.log("Enviando hábito:", { title: newHabitTitle, userId, category: newHabitCategory, frequency: newHabitFrequency }); // Confirmação de envio
 
@@ -166,7 +168,7 @@ export default function HabitsList() {
             onChange={e => setNewHabitTitle(e.target.value)}
           />
           <div className="habit-input-group">
-            <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
+            <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)} required>
                 <option value="">Categoria</option>
                 <option value='Saúde'>Saúde</option>
                 <option value='Estudos'>Estudos</option>
@@ -174,7 +176,7 @@ export default function HabitsList() {
                 <option value='Pessoal'>Pessoal</option>
               </select>
 
-              <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
+              <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)} required>
                 <option value="">Frequência</option>
                 <option value='Diário'>Diário</option>
                 <option value='Semanal'>Semanal</option>

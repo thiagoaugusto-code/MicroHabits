@@ -16,10 +16,10 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.habits-container h2 {
+h2 {
+  color: #fff;
   text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 20px;    
 }
 
 /* ----- Filtros e criação ----- */
