@@ -20,6 +20,10 @@ export default function HabitsList() {
   const user = storedUser ? JSON.parse(storedUser) : null;
   const userId = user?.id || user?.userId || user?.sub;
 
+  const completedCount = habits.filter(habit => habit.completed).length;
+  const totalCount = habits.length;
+  const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
   // Debug temporário pra conferir o que vem do token
   console.log("Usuário no localStorage:", user);
   console.log("ID do usuário detectado:", userId);
@@ -124,92 +128,103 @@ export default function HabitsList() {
   
 
   return (
-    <div>
-      <h2>Meus Hábitos</h2>
-      <div >
-        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-          <option value=''>Todas as Categorias</option>
-          <option value='Saúde'>Saúde</option>
-          <option value='Estudos'>Estudos</option>
-          <option value='Trabalho'>Trabalho</option>
-          <option value="Pessoal">Pessoal</option>
-        </select>
 
-        <select value={filterFrequency} onChange={e => setFilterFrequency(e.target.value)}>
-          <option value=''>Todas as Frequências</option>
-          <option value='Diário'>Diário</option>
-          <option value='Semanal'>Semanal</option>
-          <option value='Mensal'>Mensal</option>
-        </select>
+    <div className="habists-container">
 
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value=''>Todos os Status</option>
-          <option value='completed'>Completados</option>
-          <option value='pending'>Pendentes</option>
-        </select>
-      </div>
+      <div>
+        <h2>Meus Hábitos</h2>
+        <div >
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            <option value=''>Todas as Categorias</option>
+            <option value='Saúde'>Saúde</option>
+            <option value='Estudos'>Estudos</option>
+            <option value='Trabalho'>Trabalho</option>
+            <option value="Pessoal">Pessoal</option>
+          </select>
 
-      <div className="new-habit-section">
+          <select value={filterFrequency} onChange={e => setFilterFrequency(e.target.value)}>
+            <option value=''>Todas as Frequências</option>
+            <option value='Diário'>Diário</option>
+            <option value='Semanal'>Semanal</option>
+            <option value='Mensal'>Mensal</option>
+          </select>
 
-        <input
-          className="new-habits-input"
-          type="text"
-          placeholder="Novo Hábito"
-          value={newHabitTitle}
-          onChange={e => setNewHabitTitle(e.target.value)}
-        />
-        <div className="habit-input-group">
-          <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
-              <option value="">Categoria</option>
-              <option value='Saúde'>Saúde</option>
-              <option value='Estudos'>Estudos</option>
-              <option value='Trabalho'>Trabalho</option>
-              <option value='Pessoal'>Pessoal</option>
-            </select>
-
-            <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
-              <option value="">Frequência</option>
-              <option value='Diário'>Diário</option>
-              <option value='Semanal'>Semanal</option>
-              <option value='Mensal'>Mensal</option>
-            </select>
-          <button onClick={addHabit}>Adicionar Hábito</button>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+            <option value=''>Todos os Status</option>
+            <option value='completed'>Completados</option>
+            <option value='pending'>Pendentes</option>
+          </select>
         </div>
-      </div>
 
+        <div className="new-habit-section">
 
-      <div className="habits-list">
-        {habits.map(habit => (
-            <div key={habit.id} className={`habit-card ${habit.category?.toLowerCase() || ''}`}
-            style={{ backgroundColor: habit.completed ? '#eafbea' : 'white'}}>
+          <input
+            className="new-habits-input"
+            type="text"
+            placeholder="Novo Hábito"
+            value={newHabitTitle}
+            onChange={e => setNewHabitTitle(e.target.value)}
+          />
+          <div className="habit-input-group">
+            <select value={newHabitCategory} onChange={e => setNewHabitCategory(e.target.value)}>
+                <option value="">Categoria</option>
+                <option value='Saúde'>Saúde</option>
+                <option value='Estudos'>Estudos</option>
+                <option value='Trabalho'>Trabalho</option>
+                <option value='Pessoal'>Pessoal</option>
+              </select>
 
-            {editingHabitId === habit.id ? (
-                <>
-                    <input value={editingHabitName} onChange={e => setEditingHabitName(e.target.value)} />
-                    <button onClick={() => saveHabit(habit.id)}>Salvar</button>
-                </>
-            ) : (
-                <>
-                <div className="habit-title-container">
-                  <input type="checkbox" checked={habit.completed || false} 
-                  onChange={() => toggleComplete(habit.id, habit.completed)}
-                  />
-                      <span className={`habit-title ${habit.completed ? 'completed' : ''}`}
-                      >{habit.title}</span>
-                </div>
-                <div className="habit-info">
-                  <p>📂 Categoria: {habit.category || "-"}</p>
-                  <p>⏰ Frequência: {habit.frequency || "-"}</p>
-                  <p>🗓️ Criado em: {new Date(habit.createdAt).toLocaleDateString()}</p>
-                </div>     
-            <div className="habit-actions">
-              <button onClick={() => startEditing(habit)}>Editar</button>
-              <button className="delete" onClick={() => deleteHabit(habit.id)}>Deletar</button>
-            </div>
-                </>
-            )}
+              <select value={newHabitFrequency} onChange={e => setNewHabitFrequency(e.target.value)}>
+                <option value="">Frequência</option>
+                <option value='Diário'>Diário</option>
+                <option value='Semanal'>Semanal</option>
+                <option value='Mensal'>Mensal</option>
+              </select>
+            <button onClick={addHabit}>Adicionar Hábito</button>
           </div>
-        ))}
+        </div>
+
+        <div className="progress-info">
+          {completedCount} de {totalCount} Hábitos concluidos ({Math.round(progress)}%)
+        </div>
+        <div className="progress-bar-container">
+          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+        </div>
+
+
+        <div className="habits-list">
+          {habits.map(habit => (
+              <div key={habit.id} className={`habit-card ${habit.category?.toLowerCase() || ''}`}
+              style={{ backgroundColor: habit.completed ? '#eafbea' : 'white'}}>
+
+              {editingHabitId === habit.id ? (
+                  <>
+                      <input value={editingHabitName} onChange={e => setEditingHabitName(e.target.value)} />
+                      <button onClick={() => saveHabit(habit.id)}>Salvar</button>
+                  </>
+              ) : (
+                  <>
+                  <div className="habit-title-container">
+                    <input type="checkbox" checked={habit.completed || false} 
+                    onChange={() => toggleComplete(habit.id, habit.completed)}
+                    />
+                        <span className={`habit-title ${habit.completed ? 'completed' : ''}`}
+                        >{habit.title}</span>
+                  </div>
+                  <div className="habit-info">
+                    <p>📂 Categoria: {habit.category || "-"}</p>
+                    <p>⏰ Frequência: {habit.frequency || "-"}</p>
+                    <p>🗓️ Criado em: {new Date(habit.createdAt).toLocaleDateString()}</p>
+                  </div>     
+              <div className="habit-actions">
+                <button onClick={() => startEditing(habit)}>Editar</button>
+                <button className="delete" onClick={() => deleteHabit(habit.id)}>Deletar</button>
+              </div>
+                  </>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
