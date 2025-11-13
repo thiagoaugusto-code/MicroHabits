@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { api } from "../api";
-import { jwtDecode } from "jwt-decode"; 
+
+// Lightweight local JWT decoder to avoid import/export issues with the
+// external `jwt-decode` package in some bundler configurations.
+// Returns the decoded payload object or null on error.
+function decodeJwt(token) {
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    // base64url -> base64
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    // Pad with '=' to make length a multiple of 4
+    const padded = base64 + "==".slice((2 - (base64.length * 3) % 4) % 4);
+    const json = atob(padded);
+    return JSON.parse(json);
+  } catch (e) {
+    console.error("Failed to decode JWT:", e);
+    return null;
+  }
+}
 
 export default function Login({ setUser, setToken }) {
   const [email, setEmail] = useState("");
@@ -20,8 +39,8 @@ export default function Login({ setUser, setToken }) {
       localStorage.setItem("token", token);
       setToken(token);
 
-      // jwtDecode correto
-      const decodedUser = jwtDecode(token);
+  // decode JWT payload (local implementation)
+  const decodedUser = decodeJwt(token);
 
       localStorage.setItem("user", JSON.stringify(decodedUser || {}));
       setUser(decodedUser);
