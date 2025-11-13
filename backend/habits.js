@@ -180,4 +180,89 @@ router.get('/progress/:userId', async (req, res) => {
     }
 });
 
+
+// Estatísticas de hábitos
+router.get('/stats/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const habits = await prisma.habit.findMany({
+            where: { userId: Number(userId) },
+            include: { completions: true },
+        });
+
+        // Função: calcular streak (dias consecutivos)
+        const calculateStreak = (completions) => {
+            if (!completions.length) return 0;
+
+            const sorted = completions
+                .map(c => new Date(c.completedAt))
+                .sort((a, b) => b - a);
+
+            let streak = 1;
+            for (let i = 1; i < sorted.length; i++) {
+                const diffDays = Math.floor((sorted[i - 1] - sorted[i]) / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) streak++;
+                else if (diffDays > 1) break;
+            }
+            return streak;
+        };
+
+        // Datas de referência
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // Completos da semana/mês
+        const weeklyCompletions = await prisma.habitCompletion.count({
+            where: {
+                userId: Number(userId),
+                completedAt: { gte: startOfWeek },
+            },
+        });
+
+        const monthlyCompletions = await prisma.habitCompletion.count({
+            where: {
+                userId: Number(userId),
+                completedAt: { gte: startOfMonth },
+            },
+        });
+
+        // Categoria mais frequente
+        const categoryCounts = habits.reduce((acc, habit) => {
+            if (habit.category) {
+                acc[habit.category] = (acc[habit.category] || 0) + 1;
+            }
+            return acc;
+        }, {});
+
+        const topCategory =
+            Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
+        // Montar resposta
+        const habitStats = habits.map(habit => ({
+            id: habit.id,
+            title: habit.title,
+            category: habit.category,
+            streak: calculateStreak(habit.completions),
+            totalCompletions: habit.completions.length,
+        }));
+
+        res.json({
+            totalHabits: habits.length,
+            topCategory,
+            weeklyCompletions,
+            monthlyCompletions,
+            habits: habitStats,
+        });
+    } catch (error) {
+        console.error('❌ Erro ao buscar estatísticas:', error);
+        res.status(400).json({ error: 'Erro ao buscar estatísticas', details: error.message });
+    }
+});
+
+
+
+
 module.exports = router;
