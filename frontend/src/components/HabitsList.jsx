@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import './HabitsList.css';
+import './Css/HabitsList.css';
 
 export default function HabitsList() {
   const [habits, setHabits] = useState([]);
