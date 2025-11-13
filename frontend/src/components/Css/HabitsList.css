@@ -37,6 +37,7 @@ h2 {
   border-radius: 6px;
   border: 1px solid #ccc;
   flex: 1;
+  width: auto;
 }
 
 button {
@@ -145,6 +146,7 @@ select {
   backdrop-filter: blur(6px);
   margin-bottom: 25px;
   margin-top: 25px;
+  width: auto;
 }
 
 /* Linha dos selects e botão */
@@ -152,6 +154,8 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .new-habits-input {
