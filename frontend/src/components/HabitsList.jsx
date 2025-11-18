@@ -44,7 +44,9 @@ export default function HabitsList() {
       const res = await api.get(`/habits?${queryParams}`);
       setHabits(res.data.map(habit => ({
         ...habit,
-        completed: habit.completions && habit.completions.length > 0
+        completed: habit.completions && habit.completions.length > 0,
+        priority: habit.priority ?? false,
+        favorite: habit.favorite ?? false
       })));
     } catch (error) {
       console.error("Erro ao buscar hábitos:", error);
@@ -127,6 +129,22 @@ export default function HabitsList() {
       console.error("Erro ao marcar/desmarcar hábito:", error);
     }
   };
+
+ const togglePriority = (habitId) => {
+  setHabits(prev =>
+    prev.map(h =>
+      h.id === habitId ? { ...h, priority: !h.priority } : h
+    )
+  );
+};
+
+const toggleFavorite = (habitId) => {
+  setHabits(prev =>
+    prev.map(h =>
+      h.id === habitId ? { ...h, favorite: !h.favorite } : h
+    )
+  );
+};
   
 
   return (
@@ -207,12 +225,30 @@ export default function HabitsList() {
               ) : (
                   <>
                   <div className="habit-title-container">
-                    <input type="checkbox" checked={habit.completed || false} 
-                    onChange={() => toggleComplete(habit.id, habit.completed)}
-                    />
+                    
                         <span className={`habit-title ${habit.completed ? 'completed' : ''}`}
                         >{habit.title}</span>
+                        <span 
+                          className={`icon-star ${habit.priority ? 'active' : ''}`}
+                          onClick={() => togglePriority(habit.id)}
+                        >
+                          ⭐
+                        </span>
+
+                        <span 
+                          className={`icon-heart ${habit.favorite ? 'active' : ''}`}
+                          onClick={() => toggleFavorite(habit.id)}
+                        >
+                          ❤️
+                        </span> 
+
+                        <input type="checkbox" checked={habit.completed || false} 
+                        onChange={() => toggleComplete(habit.id, habit.completed)}
+                        className="checkbox"
+                        />
                   </div>
+
+                  
                   <div className="habit-info">
                     <p>📂 Categoria: {habit.category || "-"}</p>
                     <p>⏰ Frequência: {habit.frequency || "-"}</p>

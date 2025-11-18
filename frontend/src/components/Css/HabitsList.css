@@ -6,6 +6,13 @@ h2 {
   margin-bottom: 20px;    
 }
 
+.checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 360px;
+}
+
 /* ----- Filtros e criação ----- */
 .filter-section, .new-habit-section {
   display: flex;
@@ -54,8 +61,8 @@ button:hover {
 
 /* ----- Título e status ----- */
 .habit-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 750;
   color: #333;
 }
 
@@ -189,4 +196,37 @@ select {
   overflow: hidden;
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
   margin-bottom: 20px;
+}
+
+/* Ícones de estrela e coração */
+.habit-icons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.icon-star, .icon-heart {
+  font-size: 1.3rem;
+  opacity: 0.4;
+  transition: 0.2s;
+}
+
+.icon-star.active,
+.icon-heart.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.icon-star:hover,
+.icon-heart:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.habit-title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
