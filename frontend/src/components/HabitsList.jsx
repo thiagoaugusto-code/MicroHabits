@@ -34,7 +34,7 @@ export default function HabitsList() {
 
   const fetchHabits = async () => {
     try {
-      const queryParams = new URLSearchParams({ userId,
+      const queryParams = new URLSearchParams({ 
         ...(filterCategory && { category: filterCategory }),
         ...(filterFrequency && { frequency: filterFrequency }),
         ...(filterStatus && { status: filterStatus }),
@@ -59,11 +59,10 @@ export default function HabitsList() {
     if (!newHabitCategory) return alert('Por favor, selecione uma categoria para o hábito.');
     if (!newHabitFrequency) return alert('Por favor, selecione uma frequência para o hábito.');
       
-    console.log("Enviando hábito:", { title: newHabitTitle, userId, category: newHabitCategory, frequency: newHabitFrequency }); // Confirmação de envio
+    console.log("Enviando hábito:", { title: newHabitTitle, category: newHabitCategory, frequency: newHabitFrequency }); // Confirmação de envio
 
     try {
       const res = await api.post('/habits', { title: newHabitTitle, 
-        userId, 
         category: newHabitCategory || null, 
         frequency: newHabitFrequency || null });
 
@@ -114,10 +113,10 @@ export default function HabitsList() {
     try {
       if (isCompleted) {
         // Desmarcar
-        await api.delete(`/habits/${habitId}/complete`, { data: { userId } });
+        await api.delete(`/habits/${habitId}/complete`, { data : { habitId } });
       } else {
         // Marcar
-        await api.post(`/habits/${habitId}/complete`, { userId });
+        await api.post(`/habits/${habitId}/complete`);
       }
       // Atualiza o estado local
       setHabits(prev =>
