@@ -4,15 +4,16 @@ const prisma = new PrismaClient();
 const router = express.Router();
 const authenticateToken = require('./authMiddleware/authM');
 
-// Aplicar middleware de autenticação a todas as rotas
+// Middleware global
 router.use(authenticateToken);
 
 // Criar hábito
 router.post('/', async (req, res) => {
-    const { title, userId, category, frequency } = req.body;
+    const { title, category, frequency } = req.body;
+    const userId = req.user.userId;
 
-    if (!title || !userId) {
-        return res.status(400).json({ error: 'Nome e userId são obrigatórios' });
+    if (!title) {
+        return res.status(400).json({ error: 'Nome é obrigatório' });
     }
 
     const validCategories = ["Saúde", "Estudos", "Trabalho", "Pessoal"];
@@ -29,30 +30,29 @@ router.post('/', async (req, res) => {
         const habit = await prisma.habit.create({
             data: {
                 title,
-                userId: Number(userId),
+                userId,
                 category: category || null,
                 frequency: frequency || null
             },
         });
         res.json(habit);
     } catch (error) {
-        console.error("❌ Erro ao criar hábito:", error);
         res.status(400).json({ error: 'Erro ao criar hábito', details: error.message });
     }
 });
 
-// Listar hábitos com filtros
-router.get('/', async (req, res) => {
-    const { userId, category, frequency, status } = req.query;
-    if (!userId) {
-        return res.status(400).json({ error: 'userId é obrigatório' });
-    }
 
-    const where = { userId: Number(userId) };
+// Listar hábitos (corrigido: completed = HOJE)
+router.get('/', async (req, res) => {
+    const userId = req.user.userId;
+    const { category, frequency } = req.query;
+
+    const where = { userId };
     if (category) where.category = category;
     if (frequency) where.frequency = frequency;
-    if (status === 'completed') where.completions = { some: {} };
-    else if (status === 'pending') where.completions = { none: {} };
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
     try {
         const habits = await prisma.habit.findMany({
@@ -63,25 +63,27 @@ router.get('/', async (req, res) => {
 
         const result = habits.map(habit => ({
             ...habit,
-            completed: habit.completions.length > 0,
+            completed: habit.completions.some(c =>
+                new Date(c.completedAt) >= startOfDay
+            ),
         }));
 
         res.json(result);
     } catch (error) {
-        console.error('❌ Erro ao buscar hábitos:', error);
         res.status(400).json({ error: 'Erro ao buscar hábitos', details: error.message });
     }
 });
 
-// Atualizar hábito
+
+// Atualizar hábito (REMOVIDO "complete")
 router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    const { title, category, frequency, complete } = req.body;
+    const { title, category, frequency } = req.body;
 
     try {
         const habit = await prisma.habit.update({
             where: { id: Number(id) },
-            data: { title, category, frequency, complete },
+            data: { title, category, frequency },
         });
         res.json(habit);
     } catch (error) {
@@ -89,84 +91,91 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+
 // Deletar hábito
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
+
     try {
-        await prisma.habitCompletion.deleteMany({ where: { habitId: Number(id) } });
-        await prisma.habit.delete({ where: { id: Number(id) } });
+        await prisma.habit.delete({
+            where: { id: Number(id) }
+        });
         res.json({ message: 'Hábito deletado com sucesso' });
     } catch (error) {
         res.status(400).json({ error: 'Erro ao deletar hábito', details: error.message });
     }
 });
 
-// Marcar hábito como feito (evita duplicar no mesmo dia)
+
+// ✅ COMPLETE — versão melhorada
 router.post('/:id/complete', async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.user.userId;
 
-    if (!userId) {
-        return res.status(400).json({ error: 'userId é obrigatório' });
-    }
-
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     try {
-        const alreadyCompleted = await prisma.habitCompletion.findFirst({
+        const completion = await prisma.habitCompletion.upsert({
             where: {
-                habitId: Number(id),
-                userId: Number(userId),
-                completedAt: { gte: startOfDay }
+                habitId_userId_completedAt: {
+                    habitId: Number(id),
+                    userId,
+                    completedAt: today,
+                }
             },
-        });
-
-        if (alreadyCompleted) {
-            return res.status(400).json({ error: 'Hábito já foi completado hoje' });
-        }
-
-        const completion = await prisma.habitCompletion.create({
-            data: {
+            update: {},
+            create: {
                 habitId: Number(id),
-                userId: Number(userId),
-                completedAt: new Date(),
+                userId,
+                completedAt: today,
             },
         });
 
         res.json(completion);
     } catch (error) {
-        console.error("❌ Erro ao marcar hábito como feito:", error);
         res.status(400).json({ error: 'Erro ao marcar hábito', details: error.message });
     }
 });
 
-// Desmarcar hábito
+
+// ❗ DESMARCAR — corrigido (só hoje)
 router.delete('/:id/complete', async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.user.userId;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
     try {
         await prisma.habitCompletion.deleteMany({
-            where: { habitId: Number(id), userId: Number(userId) },
+            where: {
+                habitId: Number(id),
+                userId,
+                completedAt: { gte: startOfDay }
+            },
         });
+
         res.json({ message: 'Hábito desmarcado' });
     } catch (error) {
         res.status(400).json({ error: 'Erro ao desmarcar hábito', details: error.message });
     }
 });
 
-// progresso do dia
-router.get('/progress/:userId', async (req, res) => {
-    const { userId } = req.params;
+
+// Progresso do dia (sem userId na URL)
+router.get('/progress', async (req, res) => {
+    const userId = req.user.userId;
+
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     try {
-        const totalHabits = await prisma.habit.count({ where: { userId: Number(userId) } });
+        const totalHabits = await prisma.habit.count({ where: { userId } });
+
         const completedHabits = await prisma.habitCompletion.count({
             where: {
-                userId: Number(userId),
+                userId,
                 completedAt: { gte: startOfDay },
             },
         });
@@ -175,94 +184,8 @@ router.get('/progress/:userId', async (req, res) => {
 
         res.json({ totalHabits, completedHabits, progress });
     } catch (error) {
-        console.error('❌ Erro ao buscar progresso:', error);
-        res.status(400).json({ error: 'Erro ao buscar progresso', details: error.message });
+        res.status(400).json({ error: 'Erro ao buscar progresso' });
     }
 });
-
-
-// Estatísticas de hábitos
-router.get('/stats/:userId', async (req, res) => {
-    const { userId } = req.params;
-
-    try {
-        const habits = await prisma.habit.findMany({
-            where: { userId: Number(userId) },
-            include: { completions: true },
-        });
-
-        // Função: calcular streak (dias consecutivos)
-        const calculateStreak = (completions) => {
-            if (!completions.length) return 0;
-
-            const sorted = completions
-                .map(c => new Date(c.completedAt))
-                .sort((a, b) => b - a);
-
-            let streak = 1;
-            for (let i = 1; i < sorted.length; i++) {
-                const diffDays = Math.floor((sorted[i - 1] - sorted[i]) / (1000 * 60 * 60 * 24));
-                if (diffDays === 1) streak++;
-                else if (diffDays > 1) break;
-            }
-            return streak;
-        };
-
-        // Datas de referência
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-        // Completos da semana/mês
-        const weeklyCompletions = await prisma.habitCompletion.count({
-            where: {
-                userId: Number(userId),
-                completedAt: { gte: startOfWeek },
-            },
-        });
-
-        const monthlyCompletions = await prisma.habitCompletion.count({
-            where: {
-                userId: Number(userId),
-                completedAt: { gte: startOfMonth },
-            },
-        });
-
-        // Categoria mais frequente
-        const categoryCounts = habits.reduce((acc, habit) => {
-            if (habit.category) {
-                acc[habit.category] = (acc[habit.category] || 0) + 1;
-            }
-            return acc;
-        }, {});
-
-        const topCategory =
-            Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
-
-        // Montar resposta
-        const habitStats = habits.map(habit => ({
-            id: habit.id,
-            title: habit.title,
-            category: habit.category,
-            streak: calculateStreak(habit.completions),
-            totalCompletions: habit.completions.length,
-        }));
-
-        res.json({
-            totalHabits: habits.length,
-            topCategory,
-            weeklyCompletions,
-            monthlyCompletions,
-            habits: habitStats,
-        });
-    } catch (error) {
-        console.error('❌ Erro ao buscar estatísticas:', error);
-        res.status(400).json({ error: 'Erro ao buscar estatísticas', details: error.message });
-    }
-});
-
-
-
 
 module.exports = router;

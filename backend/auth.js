@@ -24,20 +24,32 @@ router.post('/register', async (req, res) => {
     }
 });
 
-//login
+// LOGIN
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
+
     try {
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return res.json({ error: 'Usuario nao encontrado' });    
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
 
         const valid = await bcrypt.compare(password, user.password);
-        if (!valid) return res.json({ error: 'Senha incorreta' });
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ message: 'Login bem-sucedido', token });
+        if (!valid) {
+            return res.status(401).json({ error: 'Senha incorreta' });
+        }
+
+        const token = jwt.sign(
+            { userId: user.id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token });
     } catch (error) {
-        res.status(500).json({ error: 'Erro no login', details: error.message });   
+        res.status(500).json({ error: 'Erro no login' });
     }
 });
 
