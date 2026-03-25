@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
         const result = habits.map(habit => ({
             ...habit,
             completed: habit.completions.some(c =>
-                new Date(c.completedAt) >= startOfDay
+                new Date(c.date) >= startOfDay
             ),
         }));
 
@@ -112,28 +112,36 @@ router.post('/:id/complete', async (req, res) => {
     const { id } = req.params;
     const userId = req.user.userId;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23,59,59,999);
 
     try {
-        const completion = await prisma.habitCompletion.upsert({
+        const alreadyCompleted = await prisma.habitCompletion.findFirst({
             where: {
-                habitId_userId_completedAt: {
-                    habitId: Number(id),
-                    userId,
-                    completedAt: today,
-                }
-            },
-            update: {},
-            create: {
                 habitId: Number(id),
                 userId,
-                completedAt: today,
-            },
+                date: { gte: startOfDay, lte: endOfDay } // ✅ AQUI
+            }
+        });
+
+        if (alreadyCompleted) {
+            return res.status(400).json({ error: 'Hábito já completado hoje' });
+        }
+
+        const completion = await prisma.habitCompletion.create({
+            data: {
+                habitId: Number(id),
+                userId,
+                date: new Date() // ✅ AQUI
+            }
         });
 
         res.json(completion);
     } catch (error) {
+        console.error("🔥 ERRO REAL:", error);
         res.status(400).json({ error: 'Erro ao marcar hábito', details: error.message });
     }
 });
@@ -152,7 +160,7 @@ router.delete('/:id/complete', async (req, res) => {
             where: {
                 habitId: Number(id),
                 userId,
-                completedAt: { gte: startOfDay }
+                date: { gte: startOfDay }
             },
         });
 
@@ -176,7 +184,7 @@ router.get('/progress', async (req, res) => {
         const completedHabits = await prisma.habitCompletion.count({
             where: {
                 userId,
-                completedAt: { gte: startOfDay },
+                date: { gte: startOfDay },
             },
         });
 
