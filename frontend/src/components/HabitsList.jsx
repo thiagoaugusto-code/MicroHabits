@@ -113,17 +113,12 @@ export default function HabitsList() {
     try {
       if (isCompleted) {
         // Desmarcar
-        await api.delete(`/habits/${habitId}/complete`, { data : { habitId } });
+        await api.delete(`/habits/${habitId}/complete`);
       } else {
         // Marcar
         await api.post(`/habits/${habitId}/complete`);
       }
-      // Atualiza o estado local
-      setHabits(prev =>
-        prev.map(habit =>
-          habit.id === habitId ? { ...habit, completed: !isCompleted } : habit
-        )
-      );
+      await fetchHabits();
     } catch (error) {
       console.error("Erro ao marcar/desmarcar hábito:", error);
     }

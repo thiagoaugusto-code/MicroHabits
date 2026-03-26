@@ -57,7 +57,7 @@ button:hover {
 .habit-card.saúde { border-left: 6px solid #2ecc71; }
 .habit-card.estudos { border-left: 6px solid #3498db; }
 .habit-card.trabalho { border-left: 6px solid #f39c12; }
-.habit-card.pessoal { border-left: 6px solid #9b59b6; }
+.habit-card.pessoal { border-left: 6px solid #d14f09; }
 
 /* ----- Título e status ----- */
 .habit-title {
