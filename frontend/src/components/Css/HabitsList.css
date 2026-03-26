@@ -1,4 +1,12 @@
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
 
+.habit-card {
+  background-color: var(--card);
+  color: var(--text);
+}
 
 h2 {
   color: #2563eb;
@@ -38,7 +46,8 @@ button:hover {
 
 /* ----- Cards de hábitos ----- */
 .habit-card {
-  background: #fff;
+  background-color: var(--card);
+  color: var(--text);
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 15px;
@@ -63,17 +72,17 @@ button:hover {
 .habit-title {
   font-size: 1.5rem;
   font-weight: 750;
-  color: #333;
+  color: var(--text);
 }
 
 .habit-title.completed {
   text-decoration: line-through;
-  color: gray;
+  color: var(--text);
 }
 
 .habit-info {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text);
 }
 
 .habit-actions {

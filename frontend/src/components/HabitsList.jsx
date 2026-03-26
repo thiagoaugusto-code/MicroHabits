@@ -209,7 +209,7 @@ const toggleFavorite = (habitId) => {
         <div className="habits-list">
           {habits.map(habit => (
               <div key={habit.id} className={`habit-card ${habit.category?.toLowerCase() || ''}`}
-              style={{ backgroundColor: habit.completed ? '#eafbea' : 'white'}}>
+              style={{ backgroundColor: habit.completed ? '#eafbea' : 'var(--card)' }}>
 
               {editingHabitId === habit.id ? (
                   <>

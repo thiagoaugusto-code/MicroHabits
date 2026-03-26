@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Register from "./components/Register.jsx";
 import Login from "./components/Login.jsx";
 import HabitsList from "./components/HabitsList.jsx";
@@ -28,6 +28,15 @@ export default function App() {
     setToken(null);
   };
 
+
+  const [theme, setTheme] = useState(
+  localStorage.getItem("theme") || "light"
+);
+useEffect(() => {
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
+}, [theme]);
+
   return (
     <Router>
       <div className="app-container">
@@ -37,6 +46,11 @@ export default function App() {
             <nav className="navbar">
               <div className="nav-left">
                 <strong>Habit Tracker</strong>
+              </div>
+              <div>
+                <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+                {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+                </button>
               </div>
               <div className="nav-links">
                 <Link to="/">Home</Link>
